@@ -29,7 +29,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const handleSignOut = () => {
     clearAuthToken();
-    document.cookie = 'exstasia_jwt=; path=/; max-age=0';
     router.push('/admin/login');
   };
 

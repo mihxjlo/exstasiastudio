@@ -13,6 +13,7 @@ export function setAuthToken(token: string): void {
 export function clearAuthToken(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(JWT_KEY);
+  document.cookie = `${JWT_KEY}=; path=/; max-age=0`;
 }
 
 export function isAuthenticated(): boolean {

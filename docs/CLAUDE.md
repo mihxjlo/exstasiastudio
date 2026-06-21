@@ -84,10 +84,15 @@ Only two ratios are supported: **16:9 (landscape)** and **9:16 (portrait)**. No 
 - Mobile overlay: backdrop `onClick` closes the menu; inner links container has `stopPropagation` so link clicks aren't intercepted
 - Docker Compose: backend `depends_on` postgres with a healthcheck condition (not yet built)
 
+## Known issues / deferred cleanup
+- No current known issues.
+
 ## Phase order
 Always implement in this order — do not jump ahead:
 1. Backend foundation (entities, auth, DataInitializer)
 2. Gallery & media API (upload, orientation, layout endpoints)
 3. Frontend public site (homepage, category pages, lightbox, contact)
 4. Admin panel (login, gallery list, media editor)
+5. Docker & CI/CD (Dockerfiles, Compose, GitHub Actions)
+6. Kubernetes (all 13 manifests, k3d demo)
 

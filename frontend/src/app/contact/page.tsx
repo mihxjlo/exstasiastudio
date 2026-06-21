@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getGalleries } from '@/lib/api';
+import { getHero } from '@/lib/api';
 import { Metadata } from 'next';
 
 const FALLBACK_HERO = 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=2070';
@@ -17,13 +17,12 @@ export default async function ContactPage() {
   let heroImage = FALLBACK_HERO;
 
   try {
-    const galleries = await getGalleries();
-    const coverGallery = galleries.find((g) => g.coverImagePath);
-    if (coverGallery && coverGallery.coverImagePath) {
-      heroImage = `${API_BASE_URL}/api/files/${coverGallery.coverImagePath}`;
+    const hero = await getHero();
+    if (hero.filePath) {
+      heroImage = `${API_BASE_URL}/api/files/${hero.filePath}`;
     }
   } catch (error) {
-    console.error('Failed to load galleries for contact background, using fallback', error);
+    console.error('Failed to load hero image for contact background, using fallback', error);
   }
 
   return (
