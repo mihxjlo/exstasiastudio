@@ -1,0 +1,13 @@
+# IDE
+.idea/
+*.iml
+
+# Backend build output
+backend/target/
+
+# Runtime uploads volume — never commit actual images
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
