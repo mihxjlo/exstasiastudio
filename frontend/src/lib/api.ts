@@ -1,7 +1,9 @@
 import { getAuthToken } from './auth';
 import { Gallery, GalleryWithMedia, Media, LayoutUpdate, LoginResponse, HeroImage } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = typeof window === 'undefined'
+  ? (process.env.INTERNAL_API_URL || 'http://localhost:8080')
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080');
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();

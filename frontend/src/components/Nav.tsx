@@ -18,14 +18,11 @@ export default function Nav() {
   const pathname = usePathname();
   const { isOpen, setIsOpen, toggle } = useMobileMenu();
 
-  if (pathname.startsWith('/admin')) return null;
-
-  // Close menu when route changes
+  // Hooks must be called before any conditional return
   useEffect(() => {
     setIsOpen(false);
   }, [pathname, setIsOpen]);
 
-  // Prevent scrolling when mobile menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -33,6 +30,8 @@ export default function Nav() {
       document.body.style.overflow = '';
     }
   }, [isOpen]);
+
+  if (pathname.startsWith('/admin')) return null;
 
   const isActive = (href: string) => {
     if (href === '/') {

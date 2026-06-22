@@ -25,14 +25,14 @@ export default function Lightbox({ images, initialIndex, onClose }: LightboxProp
       if (e.key === 'Escape') {
         onClose();
       } else if (e.key === 'ArrowRight') {
-        handleNext();
+        setCurrentIndex((prev) => (prev + 1) % images.length);
       } else if (e.key === 'ArrowLeft') {
-        handlePrev();
+        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, images]);
+  }, [images.length, onClose]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
