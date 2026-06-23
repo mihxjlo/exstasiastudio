@@ -107,18 +107,19 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-2">
         {sortedRowKeys.map((rowKey) => (
-          <Droppable key={rowKey} droppableId={String(rowKey)} direction="horizontal">
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={`flex gap-2 p-2 border rounded-lg mb-2 min-h-[100px] transition-colors duration-150 ${
-                  snapshot.isDraggingOver ? 'border-ex-pink bg-ex-pink/5' : 'border-zinc-800'
-                }`}
-              >
-                <span className="text-zinc-600 text-[10px] uppercase tracking-wider self-start mt-1 mr-1 select-none flex-shrink-0">
-                  R{rowKey}
-                </span>
+          <div key={rowKey} className="flex items-stretch gap-1 mb-2">
+            <span className="text-zinc-600 text-[10px] uppercase tracking-wider self-start mt-3 select-none flex-shrink-0 w-6">
+              R{rowKey}
+            </span>
+            <Droppable droppableId={String(rowKey)} direction="horizontal">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={`flex gap-2 p-2 border rounded-lg min-h-[100px] flex-1 transition-colors duration-150 ${
+                    snapshot.isDraggingOver ? 'border-ex-pink bg-ex-pink/5' : 'border-zinc-800'
+                  }`}
+                >
                 {rows[rowKey].map((item, index) => (
                   <Draggable key={item.id} draggableId={String(item.id)} index={index}>
                     {(dragProvided, dragSnapshot) => (
@@ -172,9 +173,10 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
                   </Draggable>
                 ))}
                 {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+                </div>
+              )}
+            </Droppable>
+          </div>
         ))}
       </div>
     </DragDropContext>
