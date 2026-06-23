@@ -21,13 +21,17 @@ Three-service architecture: Next.js 14 frontend + Spring Boot 3 backend + Postgr
 │   └── exstasia-studio-prd.docx
 ├── MOCKUPS/           # design reference screenshots
 ├── frontend/          # Next.js app
+│   ├── Dockerfile
+│   ├── .dockerignore
 │   └── .env.example
 ├── backend/           # Spring Boot app
+│   ├── Dockerfile
 │   └── .env.example
+├── k8s/               # Kubernetes manifests (not yet built)
 ├── uploads/           # runtime image volume — gitignored
 ├── .gitignore
-├── k8s/               # Kubernetes manifests (not yet built)
-└── docker-compose.yml (not yet built)
+├── .env               # real secrets — gitignored, never commit
+└── docker-compose.yml
 ```
 
 ## Backend conventions
@@ -82,17 +86,25 @@ Only two ratios are supported: **16:9 (landscape)** and **9:16 (portrait)**. No 
 - Lightbox navigates through ALL images in the current category, not just the clicked row
 - Admin layout changes auto-save on drag-end via `PUT /api/media/layout`
 - Mobile overlay: backdrop `onClick` closes the menu; inner links container has `stopPropagation` so link clicks aren't intercepted
-- Docker Compose: backend `depends_on` postgres with a healthcheck condition (not yet built)
+
+## Docker
+- **Two API URL env vars exist** — `NEXT_PUBLIC_API_URL` (baked at build time, used by the browser) and `INTERNAL_API_URL` (runtime, used by the Next.js SSR server). `api.ts` branches on `typeof window === 'undefined'`. In Compose, `NEXT_PUBLIC_API_URL=http://localhost:8080` is a build arg; `INTERNAL_API_URL=http://backend:8080` is a runtime env var on the frontend service.
+- **`sharp` is not in `package.json`** — installed via `RUN npm install --no-save sharp` in the Dockerfile runner stage after the standalone output is copied in. Required by Next.js standalone for `next/image` optimization.
+- **`/app/.next/cache` permissions** — COPY commands in the runner stage must use `--chown=nextjs:nextjs`. The cache dir must be pre-created with `RUN mkdir -p /app/.next/cache && chown nextjs:nextjs /app/.next/cache` before `USER nextjs`.
+- **Backend healthcheck** uses `wget -q --spider http://localhost:8080/api/galleries` (Alpine has `wget`, not `curl`). `start_period: 30s` gives the JVM time to boot.
+- **Frontend `depends_on` backend with `condition: service_healthy`** — without this the frontend SSR requests race the backend startup and get ECONNREFUSED.
+- **Docker volumes start empty** — locally uploaded images live on the host. After `docker compose up`, re-upload through the admin panel to populate the volume.
+- **`.env` at repo root** holds real secrets (JWT_SECRET, passwords). It is gitignored. Never commit it.
 
 ## Known issues / deferred cleanup
 - No current known issues.
 
 ## Phase order
 Always implement in this order — do not jump ahead:
-1. Backend foundation (entities, auth, DataInitializer)
-2. Gallery & media API (upload, orientation, layout endpoints)
-3. Frontend public site (homepage, category pages, lightbox, contact)
-4. Admin panel (login, gallery list, media editor)
-5. Docker & CI/CD (Dockerfiles, Compose, GitHub Actions)
+1. Backend foundation (entities, auth, DataInitializer) ✅
+2. Gallery & media API (upload, orientation, layout endpoints) ✅
+3. Frontend public site (homepage, category pages, lightbox, contact) ✅
+4. Admin panel (login, gallery list, media editor) ✅
+5. Docker & CI/CD (Dockerfiles, Compose, GitHub Actions) — Dockerfiles + Compose done ✅, GitHub Actions remaining
 6. Kubernetes (all 13 manifests, k3d demo)
 
