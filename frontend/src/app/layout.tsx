@@ -11,7 +11,7 @@ const archivo = Archivo({
 })
 
 export const metadata: Metadata = {
-  title: "Exstasia Studio | Anastasia Jorgusheska",
+  title: "Exstasia Studio | Anastasia Jorgusheska | Photography",
   description: "Photography Portfolio for Anastasia Jorgusheska (Exstasia Studio) featuring Portrait, Editorial, Campaign, and Events photography.",
 };
 
