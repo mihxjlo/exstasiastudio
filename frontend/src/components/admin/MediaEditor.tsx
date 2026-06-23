@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Media, LayoutUpdate } from '@/types';
 import { deleteMedia, updateMediaLayout } from '@/lib/api';
@@ -14,9 +14,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) {
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [localMedia, setLocalMedia] = useState<Media[]>(media);
+
+  // Keep local order in sync when the parent refetches (upload, delete, auto-arrange)
+  useEffect(() => {
+    setLocalMedia(media);
+  }, [media]);
 
   // Group media into rows by rowGroup
-  const rows = media.reduce((acc, item) => {
+  const rows = localMedia.reduce((acc, item) => {
     if (!acc[item.rowGroup]) acc[item.rowGroup] = [];
     acc[item.rowGroup].push(item);
     return acc;
@@ -39,7 +45,7 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
     }
   }, [onMediaChange]);
 
-  const handleDragEnd = useCallback(async (result: DropResult) => {
+  const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
 
     const sourceRowKey = parseInt(result.source.droppableId, 10);
@@ -47,12 +53,13 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
     const sourceIndex = result.source.index;
     const destIndex = result.destination.index;
 
-    // Build new arrangement
-    const newRows = { ...rows };
+    // No-op if dropped in the same spot
+    if (sourceRowKey === destRowKey && sourceIndex === destIndex) return;
 
-    // Deep copy arrays
-    for (const key of Object.keys(newRows)) {
-      newRows[parseInt(key, 10)] = [...newRows[parseInt(key, 10)]];
+    // Deep copy current rows
+    const newRows: Record<number, Media[]> = {};
+    for (const key of Object.keys(rows)) {
+      newRows[parseInt(key, 10)] = [...rows[parseInt(key, 10)]];
     }
 
     // Remove from source
@@ -66,25 +73,25 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
     // Insert at destination
     newRows[destRowKey].splice(destIndex, 0, movedItem);
 
-    // Build layout updates
+    // Flatten back into a media array, stamping new rowGroup + displayOrder
     const updates: LayoutUpdate[] = [];
-    for (const rowKeyStr of Object.keys(newRows)) {
-      const rowKey = parseInt(rowKeyStr, 10);
+    const newMedia: Media[] = [];
+    const orderedKeys = Object.keys(newRows).map(Number).sort((a, b) => a - b);
+    for (const rowKey of orderedKeys) {
       newRows[rowKey].forEach((item, idx) => {
-        updates.push({
-          id: item.id,
-          rowGroup: rowKey,
-          displayOrder: idx,
-        });
+        newMedia.push({ ...item, rowGroup: rowKey, displayOrder: idx });
+        updates.push({ id: item.id, rowGroup: rowKey, displayOrder: idx });
       });
     }
 
-    try {
-      await updateMediaLayout(updates);
-      onMediaChange();
-    } catch (err) {
+    // Optimistic update — reflect the move immediately, no waiting on the network
+    setLocalMedia(newMedia);
+
+    // Persist in the background; on failure, refetch the authoritative order
+    updateMediaLayout(updates).catch((err) => {
       console.error('Failed to update layout:', err);
-    }
+      onMediaChange();
+    });
   }, [rows, onMediaChange]);
 
   if (media.length === 0) {
@@ -129,6 +136,7 @@ export default function MediaEditor({ media, onMediaChange }: MediaEditorProps) 
                           src={`${API_BASE_URL}/api/files/${item.filePath}`}
                           alt={item.originalFilename}
                           className="w-full h-full object-contain"
+                          draggable={false}
                         />
                         {/* Orientation badge */}
                         <span className="absolute bottom-1 left-1 bg-black/70 text-[8px] text-zinc-300 px-1 py-0.5 rounded">
