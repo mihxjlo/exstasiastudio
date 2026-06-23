@@ -8,8 +8,10 @@ backend/target/
 # Runtime uploads volume — never commit actual images
 uploads/
 
-# Environment secrets
+# Environment secrets — never commit real values
 .env
+k8s/postgres-secret.yaml
+k8s/backend-secret.yaml
 
 # OS
 .DS_Store

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-configmap
+  namespace: exstasia
+data:
+  INTERNAL_API_URL: "http://backend:8080"

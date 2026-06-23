@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-configmap
+  namespace: exstasia
+data:
+  DB_URL: "jdbc:postgresql://postgres:5432/exstasia"
+  DB_USER: "postgres"
+  ADMIN_EMAIL: "admin@exstasia.com"
+  CORS_ORIGINS: "http://exstasia.local"
+  UPLOADS_DIR: "/uploads"
