@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mihxjlo/exstasia-backend:20c0ac45fc074c9be2d8d00ee77a312faa818f44
+          image: mihxjlo/exstasia-backend:badb44830e508aa8c652f8395b8b22f7d492c26b
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
