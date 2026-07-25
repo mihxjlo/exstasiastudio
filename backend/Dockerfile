@@ -14,4 +14,5 @@ RUN chown spring:spring app.jar
 VOLUME ["/uploads"]
 USER spring
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Size the heap from the container memory limit rather than the JVM's 25% default.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

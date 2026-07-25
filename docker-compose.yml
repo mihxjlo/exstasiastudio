@@ -26,6 +26,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}
       CORS_ORIGINS: http://localhost:3000
       UPLOADS_DIR: /uploads
+      # Local dev starts from an empty volume, so the schema must be created.
+      JPA_DDL_AUTO: update
     volumes:
       - uploads:/uploads
     ports:

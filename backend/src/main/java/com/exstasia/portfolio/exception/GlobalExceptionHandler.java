@@ -1,5 +1,7 @@
 package com.exstasia.portfolio.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
@@ -61,10 +65,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Catch-all. The real cause is logged server-side but never returned: raw
+     * exception messages can carry SQL, schema names and filesystem paths.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
+        log.error("Unhandled exception", ex);
         Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
+        error.put("error", "An unexpected error occurred.");
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

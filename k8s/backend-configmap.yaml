@@ -9,3 +9,6 @@ data:
   ADMIN_EMAIL: "admin@exstasia.com"
   CORS_ORIGINS: "http://exstasia.local"
   UPLOADS_DIR: "/uploads"
+  # 'validate' never alters the live schema. Set to "update" for the very first
+  # boot against a brand-new database, then change it back and re-commit.
+  JPA_DDL_AUTO: "validate"
