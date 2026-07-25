@@ -5,7 +5,9 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
-FROM eclipse-temurin:17-jre-alpine AS runtime
+# Corretto rather than eclipse-temurin:17-jre-alpine: Temurin publishes musl/Alpine
+# builds for x64 only, which would break the arm64 image Oracle Cloud needs.
+FROM amazoncorretto:17-alpine AS runtime
 WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 RUN mkdir -p /uploads && chown spring:spring /uploads

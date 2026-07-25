@@ -17,6 +17,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Enables building arm64 images on an amd64 runner. Oracle Cloud's Always-Free
+      # instances are ARM, so amd64-only images would fail with "exec format error".
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -31,6 +36,9 @@ jobs:
         with:
           context: ./backend
           push: true
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
           tags: |
             mihxjlo/exstasia-backend:latest
             mihxjlo/exstasia-backend:${{ github.sha }}
@@ -40,6 +48,9 @@ jobs:
         with:
           context: ./frontend
           push: true
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,scope=frontend,mode=max
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.PUBLIC_URL }}
           tags: |
