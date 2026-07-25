@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,29 +57,20 @@ public class MediaService {
 
         try {
             for (MultipartFile file : files) {
-                String fileName = fileStorageService.storeFile(file);
-                storedFiles.add(fileName);
+                // storeFile validates the upload and reports the dimensions it read
+                // from the image header, so the file is never re-read here.
+                FileStorageService.StoredImage stored = fileStorageService.storeFile(file);
+                storedFiles.add(stored.fileName());
 
-                // Detect orientation using javax.imageio.ImageIO
-                BufferedImage image;
-                try {
-                    image = ImageIO.read(file.getInputStream());
-                } catch (IOException e) {
-                    throw new IllegalArgumentException("Failed to read image file for dimensions: " + file.getOriginalFilename());
-                }
-                if (image == null) {
-                    throw new IllegalArgumentException("Unsupported image format: " + file.getOriginalFilename());
-                }
-
-                int width = image.getWidth();
-                int height = image.getHeight();
+                int width = stored.width();
+                int height = stored.height();
                 Orientation orientation = (width > height) ? Orientation.LANDSCAPE : Orientation.PORTRAIT;
 
                 Media media = Media.builder()
                         .gallery(gallery)
-                        .filePath(fileName)
+                        .filePath(stored.fileName())
                         .originalFilename(file.getOriginalFilename())
-                        .mimeType(file.getContentType())
+                        .mimeType(stored.contentType())
                         .fileSizeBytes(file.getSize())
                         .widthPx(width)
                         .heightPx(height)

@@ -34,14 +34,18 @@ public class HeroService {
         HeroImage hero = heroImageRepository.findById(HERO_ROW_ID)
                 .orElse(HeroImage.builder().id(HERO_ROW_ID).build());
 
-        if (hero.getFilePath() != null) {
-            fileStorageService.deleteFile(hero.getFilePath());
-        }
+        // Store first: storeFile validates the upload and throws on a bad file, so the
+        // existing hero image must not be deleted until a valid replacement exists.
+        String previousPath = hero.getFilePath();
+        String newPath = fileStorageService.storeFile(file).fileName();
 
-        String newPath = fileStorageService.storeFile(file);
         hero.setFilePath(newPath);
         hero.setUpdatedAt(LocalDateTime.now());
         heroImageRepository.save(hero);
+
+        if (previousPath != null) {
+            fileStorageService.deleteFile(previousPath);
+        }
 
         return new HeroImageDto(newPath);
     }
