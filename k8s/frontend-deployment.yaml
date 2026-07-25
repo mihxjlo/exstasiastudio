@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: mihxjlo/exstasia-frontend:c30e1b6f71d9265fa009c90591c485aae34675b4
+          image: mihxjlo/exstasia-frontend:e79e27399442ca39eb5ad046f12bc960b64d793b
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
