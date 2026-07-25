@@ -38,15 +38,23 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Seed admin user if none exists
-        if (adminUserRepository.findByEmail(adminEmail).isEmpty()) {
+        // 1. Seed the admin user, or re-sync its password if ADMIN_PASSWORD changed.
+        // The environment is the source of truth: there is no UI to change the
+        // password, so without this a rotated ADMIN_PASSWORD would never take effect.
+        adminUserRepository.findByEmail(adminEmail).ifPresentOrElse(existing -> {
+            if (!passwordEncoder.matches(adminPassword, existing.getHashedPassword())) {
+                existing.setHashedPassword(passwordEncoder.encode(adminPassword));
+                adminUserRepository.save(existing);
+                System.out.println("Admin password updated from environment for: " + adminEmail);
+            }
+        }, () -> {
             AdminUser admin = AdminUser.builder()
                     .email(adminEmail)
                     .hashedPassword(passwordEncoder.encode(adminPassword))
                     .build();
             adminUserRepository.save(admin);
             System.out.println("Admin user seeded: " + adminEmail);
-        }
+        });
 
         // 2. Seed galleries if none exist
         seedGallery("Portrait", "portrait", 0);

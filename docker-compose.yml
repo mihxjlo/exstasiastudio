@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: exstasia
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,10 +20,10 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/exstasia
       DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@exstasia.com}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}
       CORS_ORIGINS: http://localhost:3000
       UPLOADS_DIR: /uploads
     volumes:
